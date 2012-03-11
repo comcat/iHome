@@ -1,0 +1,46 @@
+
+
+	Switch Box README
+      ---------------------
+
+
+1. Outline
+
+Switch box is a small box plugged in the standard electrical socket (AC 220V)
+to control the electrical switch on/off
+
+We use a NRF24LE1 singal chip controller in the box to send/receive wireless
+message, drive the electric relay
+
+
+2. Compile
+
+Please using the 'Keil C51' with following commands to compile it:
+
+	Project --> Open project --> select the *.Uv2 project file
+
+*.Uv2 is a text file, you can edit it using vim/notepad. By default we install
+the Keil C51 at C:\Keil\, so the enviroment variable in *.Uv2 is:
+
+	EnvBin (C:\Keil\C51\BIN\)
+	EnvLib (C:\Keil\C51\LIB\)
+
+and we put the public header file in ..\..\lib so:
+
+	EnvInc (..\..\lib\)
+
+
+You need make sure the above env is right for your environment. Then execute:
+
+	Project --> Build Target (F7)
+
+
+
+3. Write the HEX file into 24LE1
+
+After you build the project correctly, Keil C51 will generate a switch-box.hex
+file. You can use the following hardware tools to write the HEX file into the
+internal flash of 24LE1:
+
+	http://item.taobao.com/item.htm?id=8819107860
+	http://item.taobao.com/item.htm?id=1405851258
