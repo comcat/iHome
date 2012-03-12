@@ -1,0 +1,25 @@
+
+
+        Arduion Ethernet Bridge
+       -------------------------
+
+
+1. Summary
+
+
+
+2. Compile
+
+Open the arduion development environment, Using the Ctrl + N to create a new project.
+Saved the project named 'arduionEtherBridge'
+
+Execute Sketch -> Add File... -> select the arduino-ether-bridge.pde -> Ctrl + s to saved 
+the project.
+
+Copy the NRF24L01/ and etherShield/ to /path/to/arduino-install-dir/libraries
+
+Execute Sketch -> Import Library... -> NRF24L01 and etherShield
+
+Ctrl + r to compile the project
+
+
