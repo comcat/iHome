@@ -72,27 +72,36 @@
 #define	HT_PLAYER	(HT_SYS | 0x03)
 #define HT_STEREO	(HT_SYS | 0x0A)
 
-#define	HT_TV_HALL		((TV << 8) | 0x01)
-#define HT_TV_BEDROOM		((TV << 8) | 0x02)
-#define HT_TV_HALL_PROJECTOR	((TV << 8) | 0x03)
+// Home Theatre Device ID
+#define	HT_TV_HALL		((HT_TV << 8) | 0x01)
+#define HT_TV_BEDROOM		((HT_TV << 8) | 0x02)
+#define HT_TV_HALL_PROJECTOR	((HT_TV << 8) | 0x03)
 
-#define HT_TOPBOX_HALL		((TOPBOX << 8) | 0x01)
-#define HT_TOPBOX_BEDROOM	((TOPBOX << 8) | 0x02)
+#define HT_TOPBOX_HALL		((HT_TOPBOX << 8) | 0x01)
+#define HT_TOPBOX_BEDROOM	((HT_TOPBOX << 8) | 0x02)
 
-#define	HT_PLAYER_DVD			((PLAYER << 8) | 0x01)
-#define	HT_PLAYER_CD			((PLAYER << 8) | 0x02)
-#define	HT_PLAYER_VCD			((PLAYER << 8) | 0x03)
-#define	HT_PLAYER_BLUERAY		((PLAYER << 8) | 0x04)
+#define	HT_PLAYER_DVD			((HT_PLAYER << 8) | 0x01)
+#define	HT_PLAYER_CD			((HT_PLAYER << 8) | 0x02)
+#define	HT_PLAYER_VCD			((HT_PLAYER << 8) | 0x03)
+#define	HT_PLAYER_BLUERAY		((HT_PLAYER << 8) | 0x04)
 
 
 // plan to add a USB serial wireless
 #define	HTPC			((PLAYER << 8) | 0x05)
 
 
-// Subsystem ID of Alarm system
+// Subsystem ID of Security system
 
 
 // Subsystem ID of Curtain System
+
+
+// Subsystem ID of Air System
+#define	AIR_SENSOR		(AIR_SYS | 0x01)
+
+// Air sensor device id, (AIR_SENSOR << 8) | DEV_ID
+#define PARLOR_TEMP_HUM		0x01
+#define	OUTDOOR_TEMP_HUM	0x02
 
 
 // Command ID

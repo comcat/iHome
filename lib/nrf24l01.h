@@ -17,7 +17,7 @@
 #define FLUSH_TX	0xE1  // Define flush TX register command
 #define FLUSH_RX	0xE2  // Define flush RX register command
 #define REUSE_TX_PL	0xE3  // Define reuse TX payload register command
-#define NOP		0xFF  // Define No Operation, might be used to read status register
+//#define NOP		0xFF  // Define No Operation, might be used to read status register
 
 #define	READ_REG	RD_REG
 #define	WRITE_REG	WR_REG
