@@ -8,7 +8,6 @@
 #define _NRF24L01_h_
 
 #include "WProgram.h"
-#include "SPI.h"
 
 class NRF24L01
 {
@@ -30,6 +29,7 @@ class NRF24L01
 	private:
 		void chip_select();
 		void chip_deselect();
+		byte spi_transfer(byte data);
 		byte read_reg(byte addr);
 		byte write_reg(byte addr, byte val);
 		byte read_buf(byte addr, byte *p_buf, byte n_bytes);
@@ -39,6 +39,9 @@ class NRF24L01
 		int _pin_CSN; // SPI SS, active low
 		int _pin_CE; // Chip Enable, active high
 		int _pin_IRQ; // Chip IRQ, active low
+		int _pin_SCK;
+		int _pin_MISO;
+		int _pin_MOSI;
 
 };
 

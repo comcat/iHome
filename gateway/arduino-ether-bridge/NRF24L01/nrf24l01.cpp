@@ -6,34 +6,68 @@
 
 #include "nrf24l01.h"
 
-
 NRF24L01::NRF24L01(byte csn, byte ce, byte irq)
 {
 	_pin_CSN = csn;
 	_pin_CE = ce;
 	_pin_IRQ = irq;
-	pinMode(_pin_CSN, OUTPUT);
-	pinMode(_pin_CE, OUTPUT);
-	pinMode(_pin_IRQ, INPUT); // for receving the irq signal
 
-	SPI.begin();
+	_pin_SCK = 9;
+	_pin_MISO = 8;
+	_pin_MOSI = 4;
+
+	pinMode(_pin_CE, OUTPUT);
+	pinMode(_pin_IRQ, INPUT);
+
+	// enable upload resistor
+	digitalWrite(_pin_IRQ, HIGH); 
+
+	//spi_begin();
+	pinMode(_pin_SCK, OUTPUT);
+	pinMode(_pin_MISO, INPUT);
+	pinMode(_pin_MOSI, OUTPUT);
+	pinMode(_pin_CSN, OUTPUT);
+
+	digitalWrite(_pin_SCK, LOW); 
+	digitalWrite(_pin_MOSI, LOW); 
+	digitalWrite(_pin_CSN, HIGH); 
+	// enable upload resistor
+	digitalWrite(_pin_MISO, HIGH); 
 }
 
 NRF24L01::NRF24L01(void)
 {
-	_pin_CSN = 10;
-	_pin_CE = 9;
-	_pin_IRQ = 8;
-	pinMode(_pin_CSN, OUTPUT);
+	_pin_SCK = 9;
+	_pin_MISO = 8;
+	_pin_MOSI = 4;
+
+	_pin_CSN = 7;
+	_pin_CE = 6;
+	_pin_IRQ = 5;
+
 	pinMode(_pin_CE, OUTPUT);
 	pinMode(_pin_IRQ, INPUT);
 
-	SPI.begin();
+	// enable upload resistor
+	digitalWrite(_pin_IRQ, HIGH); 
+
+	//spi_begin();
+	pinMode(_pin_SCK, OUTPUT);
+	pinMode(_pin_MISO, INPUT);
+	pinMode(_pin_MOSI, OUTPUT);
+	pinMode(_pin_CSN, OUTPUT);
+
+	digitalWrite(_pin_SCK, LOW); 
+	digitalWrite(_pin_MOSI, LOW); 
+	digitalWrite(_pin_CSN, HIGH); 
+	// enable upload resistor
+	digitalWrite(_pin_MISO, HIGH); 
 }
 
 void NRF24L01::chip_select()
 {
-	cli();		// disable interrupt
+	// disable interrupt
+	//cli();
 
 	// set the SS to LOW, enable the chip
 	digitalWrite(_pin_CSN, LOW);
@@ -43,16 +77,42 @@ void NRF24L01::chip_deselect()
 {
 	// set the SS to HIGH, disable the chip
 	digitalWrite(_pin_CSN, HIGH);
-	sei();		// enaable interrupt
+
+	// enaable interrupt
+	//sei();
 }
+
+byte NRF24L01::spi_transfer(byte data)
+{
+	byte i, temp = 0;
+	for(i=0; i<8; i++)
+	{
+		if(data & 0x80)
+			digitalWrite(_pin_MOSI, HIGH);
+		else
+			digitalWrite(_pin_MOSI, LOW);
+
+		data = (data << 1);
+		temp <<= 1;
+
+		digitalWrite(_pin_SCK, HIGH);
+
+		if(digitalRead(_pin_MISO))
+			temp++;
+
+		digitalWrite(_pin_SCK, LOW);
+	}
+
+	return (temp);
+}
+
 
 byte NRF24L01::read_reg(byte addr)
 {
 	byte value;
-	addr += RD_REG;
 	chip_select();
-	SPI.transfer(addr); //select register to read from
-	value = SPI.transfer(0); // read the register value
+	spi_transfer(addr+RD_REG); //select register to read from
+	value = spi_transfer(0); // read the register value
 	chip_deselect();
 	return value;
 }
@@ -62,8 +122,8 @@ byte NRF24L01::write_reg(byte addr, byte value)
 	byte status;
 	//addr += WR_REG;
 	chip_select();
-	status = SPI.transfer(addr); //select register
-	SPI.transfer(value); //write value to it
+	status = spi_transfer(addr); //select register
+	spi_transfer(value); //write value to it
 	chip_deselect();
 	return status;
 }
@@ -72,9 +132,9 @@ byte NRF24L01::read_buf(byte addr, byte *p_buf, byte n_bytes)
 {
 	byte status, i;
 	chip_select();
-	status = SPI.transfer(addr); // select the buffer register
+	status = spi_transfer(addr); // select the buffer register
 	for (i=0; i<n_bytes; i++)
-		p_buf[i] = SPI.transfer(0);
+		p_buf[i] = spi_transfer(0);
 
 	chip_deselect();
 	return status;
@@ -84,9 +144,9 @@ byte NRF24L01::write_buf(byte addr, byte *p_buf, byte n_bytes)
 {
 	byte status, i;
 	chip_select();
-	status = SPI.transfer(addr); // select the buffer register
+	status = spi_transfer(addr); // select the buffer register
 	for (i=0; i<n_bytes; i++)
-		SPI.transfer(*p_buf++);
+		spi_transfer(*p_buf++);
 	chip_deselect();
 	return status;
 
@@ -102,8 +162,8 @@ void NRF24L01::trans_init()
 	write_reg(WR_REG+EN_AA, 0x01);		// enable auto ack:pipe0
 	write_reg(WR_REG+SETUP_AW, 0x3);
 
-	write_reg(WR_REG+CONFIG, PWR_UP);	// enter standby-I mode
-	delay(5);
+//	write_reg(WR_REG+CONFIG, PWR_UP);	// enter standby-I mode
+//	delay(5);
 }
 
 void NRF24L01::rx_config(byte pipe_num, byte *pipe_addr, byte pipe_addr_width, byte rx_pload_width)
@@ -163,7 +223,7 @@ byte NRF24L01::check_tx_flag()
 	}
 	else if(tmp & MAX_RT)
 	{
-		flag = 0;
+		flag = -2;
 	}
 	else
 		flag = 0;

@@ -10,7 +10,6 @@
  * Title: Microchip ENC28J60 Ethernet Interface Driver
  * Chip type           : ATMEGA88 with ENC28J60
  *********************************************/
-
 #include <avr/io.h>
 #include <WProgram.h>
 
@@ -20,7 +19,7 @@
 static uint8_t Enc28j60Bank;
 static uint16_t NextPacketPtr;
 
-#define ENC28J60_CONTROL_CS     10
+#define ENC28J60_CONTROL_CS                     10
 #define SPI_MOSI				11
 #define SPI_MISO				12
 #define SPI_SCK					13
@@ -154,7 +153,15 @@ void enc28j60Init(uint8_t* macaddr)
 {
         // ss as output:
 	pinMode(ENC28J60_CONTROL_CS, OUTPUT);
+        pinMode(SPI_SCK, OUTPUT);
+        pinMode(SPI_MOSI, OUTPUT);
+        pinMode(SPI_MISO, INPUT);
+
 	digitalWrite(ENC28J60_CONTROL_CS, HIGH);
+	digitalWrite(SPI_SCK, LOW);
+	digitalWrite(SPI_MOSI, LOW);
+
+	digitalWrite(SPI_MISO, HIGH);
 
 	// perform system reset
 	enc28j60WriteOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
@@ -311,3 +318,4 @@ uint16_t enc28j60PacketReceive(uint16_t maxlen, uint8_t* packet)
 	enc28j60WriteOp(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
 	return(len);
 }
+
