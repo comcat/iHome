@@ -6,6 +6,28 @@
 
 1. Summary
 
+We use the arduino duemilanove board as base board.
+
+And use a NRF24L01 module.
+
+Digital Port for NRF24L01:
+
+	9 -> SCK
+	8 -> MISO
+	7 -> CSN
+	6 -> CE
+	5 -> IRQ
+	4 -> MOSI
+
+Ethernet we use a arduino ethernet shield v1.1 board used a enc28j60 chip.
+
+Digital Port for ethernet shield:
+
+	13 -> SCK
+	12 -> MISO
+	11 -> MOSI
+	10 -> SS
+	3 ->  INT
 
 
 2. Compile
@@ -21,5 +43,3 @@ Copy the NRF24L01/ and etherShield/ to /path/to/arduino-install-dir/libraries
 Execute Sketch -> Import Library... -> NRF24L01 and etherShield
 
 Ctrl + r to compile the project
-
-
