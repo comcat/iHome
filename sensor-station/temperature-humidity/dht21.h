@@ -104,29 +104,57 @@ uint8_t dht21_data_check(void)
 
 }
 
-float dht21_temperature(void)
+void dht21_temperature(char *buf)
 {
 	int16_t T = (T_H << 8) | T_L;
-	float tt;
+	//float tt;
+	int8_t len;
+
+	memset(buf, 0, 8);
 
 	if(T >= 0)
-		tt = T/10 + (T%10) * 0.1;
+	{
+		//tt = T/10 + (T%10) * 0.1;
+		sprintf(buf, "%d", T/10);
+
+		len = sizeof(buf);
+		buf[len] = '.';
+		sprintf(buf + len + 1, "%d", T%10);
+	}
 	else
 	{
 		T = T & 0x7FFF;
-		tt = -(T/10 + (T%10) * 0.1);
+		//tt = -(T/10 + (T%10) * 0.1);
+		buf[0] = '-';
+
+		sprintf(buf + 1, "%d", T/10);
+
+		len = sizeof(buf);
+		buf[len] = '.';
+
+		sprintf(buf + len + 1, "%d", T%10);
 	}
 
-	return tt;
+	//return tt;
 }
 
-float dht21_humidity(void)
+void dht21_humidity(char *buf)
 {
 	int16_t RH = (RH_H << 8) | RH_L;
-	float hum;
-	hum = RH/10 + (RH%10) * 0.1;
+	int8_t len;
 
-	return hum;
+	memset(buf, 0, 8);
+
+	//float hum;
+	//hum = RH/10 + (RH%10) * 0.1;
+
+	sprintf(buf, "%d", RH/10);
+
+	len = sizeof(buf);
+	buf[len] = '.';
+	sprintf(buf + len + 1, "%d", RH%10);
+
+	//return hum;
 }
 
 #endif

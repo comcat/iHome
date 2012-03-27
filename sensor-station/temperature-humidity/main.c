@@ -9,6 +9,7 @@
 #include "nrf24l01.h"
 
 #include "dht21.h"
+#include "avr-uart.h"
 
 void Delay(int s)
 {
@@ -260,11 +261,11 @@ char nrf24_check_rx(char *buf, char rx_pload_width)
 
 
 /******************** DHT21 function ******************/
-// Using PA7 as data pin
+// Using PC7 as data pin
 
 uint8_t dht21_read_pin(void)
 {
-	if(PINA & (1 << PA7))
+	if(PINC & (1 << PC7))
 		return 1;
 	else
 		return 0;
@@ -273,47 +274,67 @@ uint8_t dht21_read_pin(void)
 void dht21_write_pin(uint8_t level)
 {
 	if(level == HIGH)
-		PORTA |= (1 << PA7);
+		PORTC |= (1 << PC7);
 	else if(level == LOW)
-		PORTA &= ~(1 << PA7);
+		PORTC &= ~(1 << PC7);
 }
 
 void dht21_pin_mode(uint8_t mode)
 {
 	if(mode == AVR_OUTPUT)
 	{
-		DDRA |= (1 << PA7);	// PA7 Out
-		DDRA = DDRA & 0xff;                                                       
+		DDRC |= (1 << PC7);	// PC7 Out
+		DDRC = DDRC & 0xff;                                                       
 	}
 	else if(mode == AVR_INPUT)
 	{
-		DDRA &= ~(1 << PA7);
-		DDRA = DDRA & 0xff;                                                       
+		DDRC &= ~(1 << PC7);
+		DDRC = DDRC & 0xff;                                                       
 	}
 }
 
 ////////////////////////////////////////////////////////
 #define	THIS_DEV_ID	PARLOR_TEMP_HUM
 
+char tempe[8], humi[8];
+
 void read_data(void)
 {
 	dht21_get_data();
+	dht21_temperature(tempe);
+	dht21_humidity(humi);
 }
 
 void return_data(void)
 {
+	char *p = tx_buf;
+
 	memset(tx_buf, 0, 32);
+
 	tx_buf[0] = T_DATA;
 	tx_buf[1] = CENTRAL_GW;
 	tx_buf[2] = 0xFF;
-	tx_buf[3] = PARLOR_PLANT;
+	tx_buf[3] = AIR_SENSOR;
 	tx_buf[4] = THIS_DEV_ID;
-	tx_buf[5] = 0x4;
+	tx_buf[5] = 0x10;
 
-	tx_buf[6] = T_H;
-	tx_buf[7] = T_L;
-	tx_buf[8] = RH_H;
-	tx_buf[9] = RH_L;
+	memcpy(p+6, tempe, 8);
+	memcpy(p+14, humi, 8);
+
+#ifdef DEBUG_WITH_UART
+	uart_put_char(T_H);
+	uart_put_char(RH_H);
+	uart_put_char(tempe[0]);
+	uart_put_char(tempe[1]);
+	uart_put_char(tempe[2]);
+	uart_put_char(tempe[3]);
+	uart_put_char(tempe[4]);
+	uart_put_char(humi[0]);
+	uart_put_char(humi[1]);
+	uart_put_char(humi[2]);
+	uart_put_char(humi[3]);
+	uart_put_char(humi[4]);
+#endif
 
 	rf_stat = PRE_TX;
 }
@@ -367,6 +388,7 @@ uint8_t parse_cmd(void)
 					read_data();
 					break;
 				case GET_DATA:
+					read_data();
 					return_data();
 					break;
 				case SCAN_DEV:
@@ -432,12 +454,12 @@ void nrf24_isr(void)
 void main(void)
 {
 	char i;
-	DDRA = DDRA | 0x80;			// PA7 Out
-	DDRA = DDRA & 0xff;			//端口方向设置                                                                       
+	DDRC = DDRC | 0x80;			// PC7 Out
+	DDRC = DDRC & 0xff;			//端口方向设置                                                                       
 	DDRB = DDRB | 0xB8;
 	DDRB = DDRB & 0xBF;
 
-	DDRC = DDRC & 0x7f;
+	//DDRC = DDRC & 0x7f;
 
 	DDRD = DDRD | 0x1A;	//PD0(rx) input, PD1(tx) output
 				//PD2 input, PD3, PD4 output
@@ -455,7 +477,9 @@ void main(void)
 	High_LED1;
 	High_LED2;
 
-
+#ifdef DEBUG_WITH_UART
+	uart_init();
+#endif
 	spi_init();
 
 	nrf24_trans_init();
