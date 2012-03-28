@@ -10,6 +10,8 @@
 
 #include "dht21.h"
 #include "avr-uart.h"
+#include "iccavr-sleep.h"
+
 
 void Delay(int s)
 {
@@ -494,6 +496,11 @@ void main(void)
 	while (1) {
 		//while (NRF24_IRQ);
 		//nrf24_isr();
+		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		sleep_enable();
+		sleep_mode();
+		sleep_disable();
+
 		if (rf_stat == PRE_TX) {
 			nrf24_tx(tx_buf, 32);
 		}
