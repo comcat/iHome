@@ -406,7 +406,7 @@ uint8_t parse_cmd(void)
 	return 0;
 }
 
-//#pragma interrupt_handler nrf24_isr:2
+#pragma interrupt_handler nrf24_isr:2
 void nrf24_isr(void)
 {
 	char st;
@@ -467,8 +467,6 @@ void main(void)
 
 	PORTD = 0xff;
 
-	SEI();
-
 	Low_LED1;
 	Low_LED2;
 
@@ -483,14 +481,19 @@ void main(void)
 	spi_init();
 
 	nrf24_trans_init();
+
+	//enable INT0
+	GICR = (1 << INT0);
+	SEI();
+
 	nrf24_tx_config(sys_id, 5);
 	nrf24_rx_config(0, sys_id, 5, 32);
 
 	nrf24_rx();
 
 	while (1) {
-		while (NRF24_IRQ);
-		nrf24_isr();
+		//while (NRF24_IRQ);
+		//nrf24_isr();
 		if (rf_stat == PRE_TX) {
 			nrf24_tx(tx_buf, 32);
 		}
