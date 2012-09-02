@@ -1,24 +1,4 @@
-/*
-  EHTERSHIELD_H library for Arduino etherShield
-  Copyright (c) 2012 Jack Tan (www.jackslab.org).  All right reserved.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
 #include <SPI.h>
-
 #include <etherShield.h>
 #include <nrf24l01.h>
 
@@ -28,7 +8,9 @@ static uint8_t mymac[6] = {0x54,0x55,0x58,0x10,0x00,0x24};
 static uint8_t myip[4] = {192,168,1,15};
 
 static char baseurl[] = "http://192.168.1.15/";
-static uint16_t mywwwport = 80; // listen port for tcp/www (max range 1-254)
+
+// listen port for tcp/www (max range 1-254)
+static uint16_t www_port = 80;
 
 #define BUF_SIZE        500
 #define STR_BUF_SIZE	8
@@ -47,7 +29,7 @@ int8_t analyse_cmd (uint8_t *str);
 byte sys_id[ID_LEN] = {0xBF, 0xA3, 0x21, 0x23, 0x01};
 byte tx_buf[32], rx_buf[32];
 
-NRF24L01 radio(7, 6, 5);
+NRF24L01 radio;
 EtherShield eth;
 
 void setup()
@@ -85,6 +67,7 @@ void loop()
 		if(eth.is_ip_and_my_ip (buf, plen) == 0)
 			return;
 
+		// echo replay
 		if(buf[IP_PROTO_P] == IP_PROTO_ICMP_V &&
 			buf[ICMP_TYPE_P] == ICMP_TYPE_ECHOREQUEST_V)
 		{
@@ -94,11 +77,12 @@ void loop()
 
 		// tcp port www start, compare only the lower byte
 		if (buf[IP_PROTO_P] == IP_PROTO_TCP_V && buf[TCP_DST_PORT_H_P] == 0
-			&& buf[TCP_DST_PORT_L_P] == mywwwport)
+			&& buf[TCP_DST_PORT_L_P] == www_port)
 		{
 			if (buf[TCP_FLAGS_P] & TCP_FLAGS_SYN_V)
 			{
-				eth.make_tcp_synack (buf); // make_tcp_synack_from_syn does already send the syn,ack
+				// make_tcp_synack_from_syn does already send the syn,ack
+				eth.make_tcp_synack (buf);
 				return;     
 			}
 
@@ -152,10 +136,28 @@ void loop()
                                         Serial.println(cmdid, HEX);
 
 					radio.tx(tx_buf, 32);
-                                        byte _tmp = 0xFF;
-					if((_tmp = radio.check_tx_flag()) == 1)
+                                        byte _tmp = radio.check_tx_flag();
+                                        byte *p_rx_buf = rx_buf;
+					if(_tmp == 0x2E)
 					{
 						//waitting for switch success radio message
+						radio.rx();
+
+						if(cmdid == GET_DATA
+							&& radio.check_rx(rx_buf, 32)
+							&& rx_buf[0] == T_DATA
+							&& rx_buf[1] == CENTRAL_GW)
+						{
+							
+							//output sensor data web page;
+							plen=eth.fill_tcp_p (buf, 0, PSTR("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<h3>"));
+							plen=eth.fill_tcp(buf, plen, (const char *)(p_rx_buf + 6));
+                                                        plen=eth.fill_tcp_p (buf, plen, PSTR(","));
+                                                        plen=eth.fill_tcp(buf, plen, (const char *)(p_rx_buf + 6 + 8));
+							plen=eth.fill_tcp_p (buf, plen, PSTR("</h3>"));
+							goto SENDTCP;
+						}
+
 						Serial.println("TX OK!");//print sucess web page
 					}
 					else
@@ -253,6 +255,8 @@ uint16_t str2short(char *abuf)
 */
 uint8_t process_cmd(char *str)
 {
+        devid = 0;
+        cmdid = 0;
         if (find_key_val(str,"devid", devidbuf)){
 		devid = str2short(devidbuf);
                 Serial.println("find devid");
