@@ -52,13 +52,21 @@ PROGMEM char index_body4[] = {
 "<tr><td>KitchenLight</td><td><a href=/?devid=2002> Switch </a></td></tr>\n\r"
 "<tr><td>Control ALL Light</td><td><a href=/?devid=2000> Turn Off all </a></td></tr>\n\r"
 };
+PROGMEM char index_body5[] = {
+"<tr><td>Airer Light</td><td><a href=/?devid=3001> Switch </a></td></tr>\n\r"
+"<tr><td>Airer Up</td><td><a href=/?devid=3002> Up </a></td></tr>\n\r"
+};
+PROGMEM char index_body6[] = {
+"<tr><td>Airer Stop</td><td><a href=/?devid=3003> Stop </a></td></tr>\n\r"
+"<tr><td>Airer Down</td><td><a href=/?devid=3004> Down </a></td></tr>\n\r"
+};
 
 PROGMEM char index_footer[] = {
 "</table><br><hr> <p> Powered By <a href=http://jackslab.org> Jack's Lab</a></p></body></html>"
 };
 
-#define	PAGE_SEC_NUM	9
+#define	PAGE_SEC_NUM	11
 
-PGM_P index_page[] PROGMEM = {index_title, index_header1, index_header2, index_body0, index_body1, index_body2, index_body3, index_body4, index_footer};
+PGM_P index_page[] PROGMEM = {index_title, index_header1, index_header2, index_body0, index_body1, index_body2, index_body3, index_body4, index_body5, index_body6, index_footer};
 
 

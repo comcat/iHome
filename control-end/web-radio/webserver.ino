@@ -21,8 +21,8 @@
 #include "ihome.h"
 #include "page.h"
 
-static byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192, 168, 1, 250);
+static byte mac[] = { 0xDE, 0xAD, 0xCE, 0xEF, 0xFE, 0xED };
+IPAddress ip(192, 168, 1, 251);
 
 EthernetServer server(80);
 
@@ -144,6 +144,7 @@ void home_page(EthernetClient & client)
 void handle_cmd(uint16_t &devid, uint16_t &cmdid)
 {
 	RadioTX radio(A5);
+	RadioTX airer(A0,200);
         uint16_t tmp;
 
 	switch (devid)
@@ -173,6 +174,34 @@ void handle_cmd(uint16_t &devid, uint16_t &cmdid)
 		case 2000:
 			radio.issue(0x9f2f12);
 			Serial.println("Ture all light off");
+			break;
+		case 3001:
+			airer.issue_airer(0xA31080FD,0x020053E2);
+			airer.issue_airer(0xA31080FD,0x020053E2);
+			airer.issue_airer(0xA31080FD,0x020053E2);
+			airer.issue_airer(0xA31080FD,0x020053E2);
+			airer.issue_airer(0xA31080FD,0x020053E2);
+			airer.issue_airer(0xA31080FD,0x020053E2);
+			airer.issue_airer(0xA31080FD,0x020053E2);
+			Serial.println("Toggle Airer Light");
+			break;
+		case 3002:
+			airer.issue_airer(0xA31080FD,0x02000B9A);
+			airer.issue_airer(0xA31080FD,0x02000B9A);
+			airer.issue_airer(0xA31080FD,0x02000B9A);
+			airer.issue_airer(0xA31080FD,0x02000B9A);
+			airer.issue_airer(0xA31080FD,0x02000B9A);
+			Serial.println("Airer Up");
+			break;
+		case 3003:
+			airer.issue_airer(0xA31080FD,0x02002DBC);
+			airer.issue_airer(0xA31080FD,0x02002DBC);
+			Serial.println("Airer Stop");
+			break;
+		case 3004:
+			airer.issue_airer(0xA31080FD,0x02004BDA);
+			airer.issue_airer(0xA31080FD,0x02004BDA);
+			Serial.println("Airer Down");
 			break;
 	}
 }
