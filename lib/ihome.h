@@ -61,6 +61,7 @@
 #define DINING_LIGHT	(LIGHT_SYS | 0x04)
 #define	WASHROOM_LIGHT	(LIGHT_SYS | 0x05)
 #define HALL_LIGHT	(LIGHT_SYS | 0x06)
+#define	ALL_LIGHT	(LIGHT_SYS | 0xFF)
 
 // Subsystem ID of Plant system
 #define	PARLOR_PLANT	(PLANT_SYS | 0x01)
